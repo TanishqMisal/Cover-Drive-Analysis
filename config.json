@@ -1,0 +1,21 @@
+{
+  "thresholds": {
+    "elbow_angle": 150,
+    "head_over_knee": 0.05,
+    "spine_angle": 15,
+    "foot_direction": 80
+
+  },
+  "tolerances": {
+    "elbow_angle":10,
+    "head_over_knee": 0.02,
+    "spine_angle": 5,
+    "foot_direction": 10
+  },
+  "ideal_values": {
+    "elbow_angle": 150,
+    "head_over_knee": 0.0,
+    "spine_angle": 0,
+    "foot_direction": 80
+  }
+}

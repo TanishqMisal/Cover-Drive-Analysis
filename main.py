@@ -1,14 +1,12 @@
 from time import process_time_ns
 import cv2 as cv
 import  mediapipe as mp
-import numpy as np
+from metrics import elbow_angle,spine_angle,head_over_knee,foot_direction
 import time
-from  final_evaluation import final_evaluation
-
 from fontTools.misc.cython import returns
 from numpy.ma.core import left_shift
 from scipy.cluster.hierarchy import from_mlab_linkage
-
+from evaluation import final_evaluation
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -17,9 +15,16 @@ all_elbow_angles = []
 all_spine_angles = []
 all_head_knee_dist = []
 all_foot_directions = []
-Video = 'C:\Cover Drive Analysis\downloaded_video.mp4'
+Video = 'C:\Cover-Drive-Analysis\downloaded_video.mp4'
+output_video = "C:\Cover-Drive-Analysis\output"
 cap = cv.VideoCapture(Video)
 
+fps = int(cap.get(cv.CAP_PROP_FPS))
+width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+
+fourcc = cv.VideoWriter_fourcc(*"mp4v")
+out = cv.VideoWriter(output_video+"\\annotated_video.mp4", fourcc, fps, (width, height))
 
 #frame counter
 frame_counter = 0
@@ -81,60 +86,12 @@ with mp_pose.Pose(min_detection_confidence=0.5,min_tracking_confidence=0.5)as po
                     else:
                         print(f"{part}: Low visibility")'''
 
-                #logic to calculate the angle
 
-                def calculate_angle(a,b,c):
-                    a = np.array(a)
-                    b = np.array(b)
-                    c = np.array(c)
-
-                    radians = np.arctan2(c[1]-b[1],c[0]-b[0])-np.arctan2(a[1]-b[1],a[0]-b[0])
-                    angle = np.abs(radians*180.0/np.pi)
-
-                    if angle > 180.0:
-                        angle = 360 - angle
-                    return angle
-
-                #for elbow(front elbow angle)
-                def elbow_angle(keypoints):
-                    if keypoints['left_shoulder'] and keypoints['left_elbow'] and keypoints['left_wrist']:
-                        return calculate_angle(
-                                keypoints['left_shoulder'][:2],
-                                keypoints['left_elbow'][:2],
-                                keypoints['left_wrist'][:2]
-                            )
-                    return  None
-                #for spine(angle between hip and shoulder)
-
-                def spine_angle(keypoints):
-                    if keypoints['left_hip'] and keypoints['left_shoulder']:
-                            hip = np.array(keypoints['left_hip'][:2])
-                            shoulder = np.array(keypoints['left_shoulder'][:2])
-                            vertical_axis = [hip[0], hip[1]-0.1]
-
-                            return calculate_angle(shoulder,hip,vertical_axis)
-                    return None
-
-                # for ead-over-knee vertical alignment (distance between head and knee)
-
-                def head_over_knee(keypoints):
-                    if keypoints['head'] and keypoints['left_knee']:
-                            return abs(keypoints['head'][0]-keypoints['left_knee'][0])
-                    return None
-
-                    # for Front Foot directions(ankle to toe direction)
-                def foot_direc(keypoints):
-                    if keypoints['left_ankle']and keypoints['left_knee']:
-                            return  calculate_angle([keypoints['left_ankle'][0]-0.1, keypoints['left_ankle'][1]],
-                                                    keypoints['left_ankle'][:2],
-                                                    keypoints['left_knee'][:2]
-                                                    )
-                    return None
 
                 value_elbow_angle = elbow_angle(keypoints)
                 value_spine = spine_angle(keypoints)
                 value_knee_align = head_over_knee(keypoints)
-                value_foot = foot_direc(keypoints)
+                value_foot = foot_direction(keypoints)
 
                 if value_elbow_angle is not None:
                     all_elbow_angles.append(value_elbow_angle)
@@ -199,6 +156,7 @@ with mp_pose.Pose(min_detection_confidence=0.5,min_tracking_confidence=0.5)as po
                                   )
         frame = cv.flip(frame,1)
         cv.imshow("Mediapipe",image)
+        out.write(image)
 
         frame_counter +=1
         end_time = time.time()
@@ -212,6 +170,7 @@ with mp_pose.Pose(min_detection_confidence=0.5,min_tracking_confidence=0.5)as po
 
         if cv.waitKey(10)&0xFF == ord('q'):
             break
+
 
 cap.release()
 cv.destroyAllWindows()
