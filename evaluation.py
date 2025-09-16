@@ -15,14 +15,27 @@ def player_report(value,metric_name, tolerance=10, smaller_is_better= False):
     tolerance = TOLERANCE[metric_name]
 
     if abs(value-ideal) <= tolerance:
-        return 10
-    deviation = abs(value-ideal)-tolerance
-    max_deviation = tolerance*3
+        score = 10
+    else:
+        deviation = abs(value-ideal)-tolerance
+        max_deviation = tolerance*3
 
-    if deviation >= max_deviation:
-        return 1
-    proportional_score = 10 - int((deviation/max_deviation)*9)
-    return max(1,proportional_score)
+        if deviation >= max_deviation:
+            score = 1
+        else:
+            score = max(1,10-int((deviation/max_deviation)))
+
+    comment_dict = {
+        "elbow_angle": "Good arm extension" if score >= 7 else"Elbow position could be improved",
+        "spine_angle": "Solid balance and posture" if score >= 7 else "Posture needs improvement",
+        "head_over_knee": "Head well -positioned over the front knee" if score >= 7 else "Head position could be more stable",
+        "foot_direction": "Excellent foot placement"if score >=7 else "Footwork needs to be worked"
+        }
+    return {
+        "score": score,
+        "average_value": round(value,2),
+        "comment": comment_dict.get(metric_name,"")
+    }
 
 def final_evaluation(all_elbow_angles, all_spine_angles,all_head_knee_dist, all_foot_directions):
     avg_elbow_angle = np.mean(all_elbow_angles)
@@ -33,15 +46,11 @@ def final_evaluation(all_elbow_angles, all_spine_angles,all_head_knee_dist, all_
     #1-10 score
 
     report = {
-        "Footwork": player_report(avg_foot,"foot_direction"),
-        "Head Position": player_report(avg_head_knee,"head_over_knee", smaller_is_better=True),
-        "Swing Control": player_report(avg_elbow_angle, "elbow_angle"),
-        "Balance": player_report(avg_spine_angle,"spine_angle",smaller_is_better=True),
-        "Follow-through": player_report(avg_elbow_angle,"elbow_angle"),
-        "Comments":[
-            "Footwork is good; maintain balance and head alignment.",
-            "Elbow position and follow-through can be improved for more control."
-        ]
+        "elbow_angle": player_report(avg_elbow_angle,"elbow_angle"),
+        "spine_lean": player_report(avg_spine_angle,"spine_angle", smaller_is_better=True),
+        "head_over_knee": player_report(avg_head_knee, "head_over_knee",smaller_is_better=True),
+        "foot_direction": player_report(avg_foot,"foot_direction"),
+        "summary": "A strong performance with great footwork and swing. Focus on keeping the head still and over the front knee for better balance and power"
     }
     #save the Report to json
     output_folder  = 'output'

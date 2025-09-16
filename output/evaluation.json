@@ -1,11 +1,23 @@
 {
-    "Footwork": 10,
-    "Head Position": 2,
-    "Swing Control": 4,
-    "Balance": 1,
-    "Follow-through": 4,
-    "Comments": [
-        "Footwork is good; maintain balance and head alignment.",
-        "Elbow position and follow-through can be improved for more control."
-    ]
+    "elbow_angle": {
+        "score": 10,
+        "average_value": 116.81,
+        "comment": "Good arm extension"
+    },
+    "spine_lean": {
+        "score": 1,
+        "average_value": 29.78,
+        "comment": "Posture needs improvement"
+    },
+    "head_over_knee": {
+        "score": 10,
+        "average_value": 0.08,
+        "comment": "Head well -positioned over the front knee"
+    },
+    "foot_direction": {
+        "score": 10,
+        "average_value": 87.22,
+        "comment": "Excellent foot placement"
+    },
+    "summary": "A strong performance with great footwork and swing. Focus on keeping the head still and over the front knee for better balance and power"
 }
