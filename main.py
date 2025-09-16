@@ -1,12 +1,14 @@
 from time import process_time_ns
 import cv2 as cv
 import  mediapipe as mp
+
 from metrics import elbow_angle,spine_angle,head_over_knee,foot_direction
 import time
 from fontTools.misc.cython import returns
 from numpy.ma.core import left_shift
 from scipy.cluster.hierarchy import from_mlab_linkage
 from evaluation import final_evaluation
+from  graph import  track_elbow_angle, smoothness_graph
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -89,6 +91,7 @@ with mp_pose.Pose(min_detection_confidence=0.5,min_tracking_confidence=0.5)as po
 
 
                 value_elbow_angle = elbow_angle(keypoints)
+                track_elbow_angle(value_elbow_angle)
                 value_spine = spine_angle(keypoints)
                 value_knee_align = head_over_knee(keypoints)
                 value_foot = foot_direction(keypoints)
@@ -178,4 +181,4 @@ print("[: Program finished")
 
 summary = final_evaluation(all_elbow_angles,all_spine_angles,all_head_knee_dist,all_foot_directions)
 print(summary)
-
+smoothness_graph(output_folder='output')
