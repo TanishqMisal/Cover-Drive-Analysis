@@ -14,13 +14,15 @@ def player_report(value,metric_name, tolerance=10, smaller_is_better= False):
     ideal = IDEALS[metric_name]
     tolerance = TOLERANCE[metric_name]
 
-    if abs(value-ideal) <= tolerance/2:
+    if abs(value-ideal) <= tolerance:
         return 10
-    if smaller_is_better:
-        point = max(1,10-int((value-ideal)/tolerance*10))
-    else:
-        point = max(1,10-int(abs(ideal-value)/tolerance*10))
-    return  min(point,10)
+    deviation = abs(value-ideal)-tolerance
+    max_deviation = tolerance*3
+
+    if deviation >= max_deviation:
+        return 1
+    proportional_score = 10 - int((deviation/max_deviation)*9)
+    return max(1,proportional_score)
 
 def final_evaluation(all_elbow_angles, all_spine_angles,all_head_knee_dist, all_foot_directions):
     avg_elbow_angle = np.mean(all_elbow_angles)
